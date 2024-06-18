@@ -1,0 +1,6 @@
+# .gitignore
+
+# Ignore virtual environment directory
+venv/
+
+# Add other files and directories to ignore as needed
