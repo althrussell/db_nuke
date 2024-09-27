@@ -67,6 +67,7 @@ def nuke_external_locations(workspace_client: WorkspaceClient, prefix: str, dry_
     one_week_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
     
     for ext_loc in ext_locs:
+        workspace_client.external_locations.update(ext_loc.name,owner='128c2d08-969f-45bc-8305-917fb0f58c72')
         if prefix:
             if ext_loc.name.startswith(prefix):
                 if dry_run:
@@ -89,6 +90,7 @@ def nuke_storage_credentials(workspace_client: WorkspaceClient, prefix: str, dry
     one_week_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
     
     for storage_cred in storage_creds:
+        workspace_client.storage_credentials.update(storage_cred.name,owner='128c2d08-969f-45bc-8305-917fb0f58c72')
         if prefix:
             if storage_cred.name.startswith(prefix):
                 if dry_run:
