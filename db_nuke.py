@@ -105,9 +105,34 @@ def nuke_storage_credentials(workspace_client: WorkspaceClient, prefix: str, dry
                     print(f"Deleting Storage Credentials {storage_cred.name}")
                     workspace_client.external_locations.delete(name=storage_cred.name,force=True) 
 
+def nuke_catalogs(workspace_client: WorkspaceClient, prefix: str, dry_run: bool):
+    catalogs = workspace_client.catalogs.list()
+    
+    one_week_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
+    
+    for catalog in catalogs:
+        if not (catalog.name.startswith('__') or 'system' in catalog.name or 'hive' in catalog.name):
+            workspace_client.catalogs.update(catalog.name,owner='128c2d08-969f-45bc-8305-917fb0f58c72')
+            if prefix:
+                if catalog.name.startswith(prefix):
+                    if dry_run:
+                        print(f"DRY RUN: Would delete Catalog {catalog.name}")
+                    else:
+                        print(f"Deleting Catalog {catalog.name}")
+                        workspace_client.catalogs.delete(name=catalog.name,force=True)
+            else:
+                creation_time = datetime.datetime.fromtimestamp(catalog.created_at / 1000.0)
+                if creation_time < one_week_ago:
+                    if dry_run:
+                        print(f"DRY RUN: Would delete Catalog {catalog.name}")
+                    else:
+                        print(f"Deleting Catalog {catalog.name}")
+                        workspace_client.catalogs.delete(name=catalog.name,force=True)
+
 def nuke_metastore_internals(workspace_client: WorkspaceClient, prefix: str, dry_run: bool):
-    #nuke_external_locations(workspace_client,prefix,dry_run)
+    nuke_external_locations(workspace_client,prefix,dry_run)
     nuke_storage_credentials(workspace_client,prefix,dry_run)
+    nuke_catalogs(workspace_client,prefix,dry_run)
 
 def nuke_workspaces(account_client: AccountClient, prefix: str, dry_run: bool):
     workspaces_list = account_client.workspaces.list()  # Assuming this method lists all workspaces
@@ -222,25 +247,27 @@ def main(databricks_account_id, client_id, client_secret, prefix, dry_run: bool,
 
     access_token = get_token(client_id, client_secret, databricks_account_id)
     account_client = build_account_client(access_token, databricks_account_id)
-    workspace_client = build_workspace_client(access_token,databricks_account_id,databricks_workspace_id)
+    
     if dry_run:
         print(f"DRY RUN")
 
     print(f"Nuking.....")    
-    # print(f"Users.....")    
-    # nuke_users(account_client, prefix, dry_run)
-    # print(f"Metastore.....")    
-    # nuke_metastore(account_client, prefix, dry_run)
-    # print(f"Workspaces.....")    
-    # nuke_workspaces(account_client, prefix, dry_run)
-    # print(f"NCC.....")    
-    # nuke_network_config(account_client, prefix, dry_run)
-    # print(f"Storage.....")    
-    # nuke_storage_config(account_client, prefix, dry_run)
-    # print(f"Credentials.....")    
-    # nuke_credential_config(account_client, prefix, dry_run)
-    print(f"Metastore Internals.....")    
-    nuke_metastore_internals(workspace_client, prefix, dry_run)
+    print(f"Users.....")    
+    nuke_users(account_client, prefix, dry_run)
+    print(f"Metastore.....")    
+    nuke_metastore(account_client, prefix, dry_run)
+    print(f"Workspaces.....")    
+    nuke_workspaces(account_client, prefix, dry_run)
+    print(f"NCC.....")    
+    nuke_network_config(account_client, prefix, dry_run)
+    print(f"Storage.....")    
+    nuke_storage_config(account_client, prefix, dry_run)
+    print(f"Credentials.....")    
+    nuke_credential_config(account_client, prefix, dry_run)
+    if databricks_workspace_id:
+        workspace_client = build_workspace_client(access_token,databricks_account_id,databricks_workspace_id)
+        print(f"Metastore Internals.....")    
+        nuke_metastore_internals(workspace_client, prefix, dry_run)
     
 
 if __name__ == "__main__":
