@@ -97,7 +97,7 @@ def nuke_storage_credentials(workspace_client: WorkspaceClient, prefix: str, dry
                     print(f"DRY RUN: Would delete Storage Credentials {storage_cred.name}")
                 else:
                     print(f"Deleting Storage Credentials {storage_cred.name}")
-                    workspace_client.external_locations.delete(name=storage_cred.name,force=True)
+                    workspace_client.storage_credentials.delete(name=storage_cred.name,force=True)
         else:
              creation_time = datetime.datetime.fromtimestamp(storage_cred.created_at / 1000.0)
              if creation_time < one_week_ago:
@@ -105,7 +105,7 @@ def nuke_storage_credentials(workspace_client: WorkspaceClient, prefix: str, dry
                     print(f"DRY RUN: Would delete Storage Credentials {storage_cred.name}")
                 else:
                     print(f"Deleting Storage Credentials {storage_cred.name}")
-                    workspace_client.external_locations.delete(name=storage_cred.name,force=True) 
+                    workspace_client.storage_credentials.delete(name=storage_cred.name,force=True) 
 
 def nuke_catalogs(workspace_client: WorkspaceClient, prefix: str, dry_run: bool):
     catalogs = workspace_client.catalogs.list()
