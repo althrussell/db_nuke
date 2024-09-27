@@ -132,8 +132,11 @@ def nuke_catalogs(workspace_client: WorkspaceClient, prefix: str, dry_run: bool)
                         workspace_client.catalogs.delete(name=catalog.name,force=True)
 
 def nuke_metastore_internals(workspace_client: WorkspaceClient, prefix: str, dry_run: bool):
+    print(f"..External Locations.....")    
     nuke_external_locations(workspace_client,prefix,dry_run)
+    print(f"..Storage Credentials.....")    
     nuke_storage_credentials(workspace_client,prefix,dry_run)
+    print(f"..Catalogs.....")   
     nuke_catalogs(workspace_client,prefix,dry_run)
 
 def nuke_workspaces(account_client: AccountClient, prefix: str, dry_run: bool):
